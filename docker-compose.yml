@@ -2,8 +2,8 @@ version: '3.8'
 
 services:
   postgres:
-    image: postgres:15-alpine
-    container_name: stock-manager-db
+    image: stock-manager-database
+    container_name: stock-manager-application-database
     environment:
       POSTGRES_DB: DALYDA
       POSTGRES_USER: postgres
@@ -17,38 +17,48 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
-    networks:
-      - stock-manager-network
+
+  mailHog:
+    image: mailhog/mailhog:latest
+    container_name: DALYDA-mailHog
+    ports:
+      - "1025:1025"  # SMTP
+      - "8025:8025"  # Web UI
 
   app:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    container_name: stock-manager-app
-    ports:
-      - "8080:8080"
+    image: stock-manager-app
+    container_name: stock-manager-application
+    depends_on:
+      - postgres
+      - mailHog
+    env_file:
+      - .env
     environment:
-      SPRING_PROFILES_ACTIVE: docker
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/DALYDA
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: postgres
       SPRING_JPA_HIBERNATE_DDL_AUTO: update
-      SPRING_MAIL_HOST: ${SPRING_MAIL_HOST:-smtp.gmail.com}
-      SPRING_MAIL_PORT: ${SPRING_MAIL_PORT:-587}
+      SPRING_JPA_SHOW_SQL: "false"
+
+      SPRING_MAIL_HOST: mailHog
+      SPRING_MAIL_PORT: 1025
       SPRING_MAIL_USERNAME: ${SPRING_MAIL_USERNAME}
       SPRING_MAIL_PASSWORD: ${SPRING_MAIL_PASSWORD}
-      JWT_SECRET: ${JWT_SECRET:-Y7FkT0KxcpHb9y5A4UO3fZzw6sAo+Pld+ArwxwQZscU=}
-    depends_on:
-      postgres:
-        condition: service_healthy
-    networks:
-      - stock-manager-network
-    restart: unless-stopped
+      SPRING_MAIL_PROPERTIES_MAIL_SMTP_AUTH: "false"
+      SPRING_MAIL_PROPERTIES_MAIL_SMTP_STARTTLS_ENABLE: "false"
+      SPRING_MAIL_FROM: no-reply@stockmanager.com
+
+      SERVER_PORT: 8080
+      APP_ENVIRONMENT: development
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_EXPIRATION: 86400000
+
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./target/*.jar:/app.jar
+      - ./logs:/logs
+    command: java -jar /app.jar
 
 volumes:
   postgres_data:
-
-networks:
-  stock-manager-network:
-    driver: bridge
-
