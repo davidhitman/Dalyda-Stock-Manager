@@ -41,14 +41,13 @@ public class AuthController {
         var userEmail = userService.passwordReset(email);
         return ResponseEntity.status(HttpStatus.OK).body(new GenericResponse<>("Password Reset Successful, a default password was sent to your email", userEmail));
     }
+
+    @Operation(summary= "Create a default Admin user", description = "Create an Admin user when the user table is empty, and there is no way to login and access the system")
+    @PostMapping("default/user")
+    public ResponseEntity<GenericResponse<UserDto.ViewDefaultAdminUserDto>> defaultAdimnUser(){
+        var defaultAdminUser = userService.defaultAdminUser();
+        return ResponseEntity.status(HttpStatus.OK).body(new GenericResponse<>("The default user has been created", defaultAdminUser));
+    }
 }
 
 //   http://localhost:8080/swagger-ui/index.html
-
-//echo "# Dalyda-Stock-Manager" >> README.md
-//git init
-//git add README.md
-//git commit -m "first commit"
-//git branch -M main
-//git remote add origin https://github.com/davidhitman/Dalyda-Stock-Manager.git
-//git push -u origin main

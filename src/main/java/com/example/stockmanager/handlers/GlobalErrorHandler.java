@@ -1,5 +1,6 @@
 package com.example.stockmanager.handlers;
 
+import com.example.stockmanager.exceptions.AdminUserExistsException;
 import com.example.stockmanager.exceptions.ForbiddenActionException;
 import com.example.stockmanager.exceptions.InsufficientStockException;
 import com.example.stockmanager.responses.GenericResponse;
@@ -70,6 +71,12 @@ public class GlobalErrorHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(value = {InsufficientStockException.class})
     public ResponseEntity<GenericResponse<?>> handleInsufficientStockException(InsufficientStockException exception) {
+        GenericResponse<?> response = new GenericResponse<>(exception.getMessage(), null);
+        return new ResponseEntity<>(response, HttpStatus.CONFLICT);
+    }
+
+    @ExceptionHandler(value = {AdminUserExistsException.class})
+    public ResponseEntity<GenericResponse<?>> handleAdminUserExistsException(AdminUserExistsException exception) {
         GenericResponse<?> response = new GenericResponse<>(exception.getMessage(), null);
         return new ResponseEntity<>(response, HttpStatus.CONFLICT);
     }

@@ -15,4 +15,5 @@ public interface UserServices {
     void deleteUser (UUID id);
     UserDto.ViewUserDto updateUser (UUID id, UserDto.UpdateUserDto signupDto);
     Page<UserDto.ViewUserDto> viewAllUsers (PageDto pageDto);
+    UserDto.ViewDefaultAdminUserDto defaultAdminUser();
 }

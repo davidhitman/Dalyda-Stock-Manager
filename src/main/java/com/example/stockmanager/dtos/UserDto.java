@@ -97,4 +97,13 @@ public class UserDto {
         private String confirmPassword;
     }
 
+    @Getter
+    @Setter
+    @AllArgsConstructor
+    @NoArgsConstructor
+    public static class ViewDefaultAdminUserDto{
+        private String Email;
+        private String Password;
+    }
+
 }

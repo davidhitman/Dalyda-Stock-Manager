@@ -3,6 +3,8 @@ package com.example.stockmanager.services.Impl;
 import com.example.stockmanager.dtos.PageDto;
 import com.example.stockmanager.dtos.UserDto;
 import com.example.stockmanager.entities.Role;
+import com.example.stockmanager.entities.Users;
+import com.example.stockmanager.exceptions.AdminUserExistsException;
 import com.example.stockmanager.exceptions.ForbiddenActionException;
 import com.example.stockmanager.mappers.UserMapper;
 import com.example.stockmanager.repositories.UserRepository;
@@ -138,6 +140,37 @@ public class UserServiceImpl implements UserServices {
         var users = userRepository.findAllUsers(pageable);
         if (users.isEmpty()) throw new ResourceNotFoundException("No Registered Users Yet");
         return users.map(UserMapper::map);
+    }
+
+    @Override
+    public UserDto.ViewDefaultAdminUserDto defaultAdminUser() {
+
+        if (userRepository.existsByRole(Role.ADMIN)) {
+            throw new AdminUserExistsException(
+                "There is already an admin user in the system. " +
+                "If you forgot your password, please use the password reset functionality to change it."
+            );
+        }
+        
+
+        String defaultEmail = "admin@stockmanager.com";
+        String defaultPassword = "Admin@123";
+        String defaultFirstName = "Admin";
+        String defaultLastName = "User";
+        String defaultPhoneNumber = "+1234567890";
+        
+        Users adminUser = new Users(defaultFirstName, defaultLastName, defaultEmail, defaultPhoneNumber);
+        String encodedPassword = passwordEncoder.encode(defaultPassword);
+        adminUser.setPassword(encodedPassword);
+        adminUser.setRole(Role.ADMIN);
+        
+        userRepository.save(adminUser);
+
+        UserDto.ViewDefaultAdminUserDto response = new UserDto.ViewDefaultAdminUserDto();
+        response.setEmail(defaultEmail);
+        response.setPassword(defaultPassword);
+        
+        return response;
     }
 
 }
