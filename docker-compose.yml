@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   postgres:
-    image: stock-manager-database
+    image: postgres:15-alpine
     container_name: stock-manager-application-database
     environment:
       POSTGRES_DB: DALYDA
@@ -17,6 +17,8 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    networks:
+      - stock-manager-network
 
   mailHog:
     image: mailhog/mailhog:latest
@@ -24,16 +26,23 @@ services:
     ports:
       - "1025:1025"  # SMTP
       - "8025:8025"  # Web UI
+    networks:
+      - stock-manager-network
 
   app:
-    image: stock-manager-app
+    build:
+      context: .
+      dockerfile: Dockerfile
     container_name: stock-manager-application
     depends_on:
-      - postgres
-      - mailHog
+      postgres:
+        condition: service_healthy
+      mailHog:
+        condition: service_started
     env_file:
       - .env
     environment:
+      SPRING_PROFILES_ACTIVE: docker
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/DALYDA
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: postgres
@@ -55,10 +64,13 @@ services:
 
     ports:
       - "8080:8080"
-    volumes:
-      - ./target/*.jar:/app.jar
-      - ./logs:/logs
-    command: java -jar /app.jar
+    networks:
+      - stock-manager-network
+    restart: unless-stopped
 
 volumes:
   postgres_data:
+
+networks:
+  stock-manager-network:
+    driver: bridge
