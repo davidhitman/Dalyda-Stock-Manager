@@ -105,37 +105,37 @@ class AuthControllerTest {
                         .content(objectMapper.writeValueAsString(loginDto)))
                 .andExpect(status().isBadRequest());
     }
-//
-//    @Test
-//    void testLogin_WrongPassword() throws Exception {
-//        loginDto.setPassword("wrongPassword");
-//
-//        mockMvc.perform(post("/api/v1/auth/login")
-//                        .contentType(MediaType.APPLICATION_JSON)
-//                        .content(objectMapper.writeValueAsString(loginDto)))
-//                .andExpect(status().isUnauthorized())
-//                .andExpect(jsonPath("$.data").isEmpty());
-//    }
-//
-//    @Test
-//    void testLogin_UserNotFound() throws Exception {
-//        loginDto.setEmail("nonexistent@example.com");
-//
-//        mockMvc.perform(post("/api/v1/auth/login")
-//                        .contentType(MediaType.APPLICATION_JSON)
-//                        .content(objectMapper.writeValueAsString(loginDto)))
-//                .andExpect(status().isBadRequest());
-//    }
-//
-//    @Test
-//    void testLogin_MissingPassword() throws Exception {
-//        loginDto.setPassword("");
-//
-//        mockMvc.perform(post("/api/v1/auth/login")
-//                        .contentType(MediaType.APPLICATION_JSON)
-//                        .content(objectMapper.writeValueAsString(loginDto)))
-//                .andExpect(status().isBadRequest());
-//    }
+
+    @Test
+    void testLogin_WrongPassword() throws Exception {
+        loginDto.setPassword("wrongPassword");
+
+        mockMvc.perform(post("/api/v1/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(loginDto)))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.data").isEmpty());
+    }
+
+    @Test
+    void testLogin_UserNotFound() throws Exception {
+        loginDto.setEmail("nonexistent@example.com");
+
+        mockMvc.perform(post("/api/v1/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(loginDto)))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void testLogin_MissingPassword() throws Exception {
+        loginDto.setPassword("");
+
+        mockMvc.perform(post("/api/v1/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(loginDto)))
+                .andExpect(status().isBadRequest());
+    }
 //
 //    @Test
 //    void testLogin_UserNotFound() throws Exception {
