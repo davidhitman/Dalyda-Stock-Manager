@@ -144,8 +144,8 @@ public class UserServiceImpl implements UserServices {
 
     @Override
     public UserDto.ViewDefaultAdminUserDto defaultAdminUser() {
-
-        if (userRepository.existsByRole(Role.ADMIN)) {
+ 
+        if (userRepository.countByRole(Role.ADMIN) > 0) {
             throw new AdminUserExistsException(
                 "There is already an admin user in the system. " +
                 "If you forgot your password, please use the password reset functionality to change it."

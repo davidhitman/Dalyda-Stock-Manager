@@ -27,7 +27,7 @@ public interface UserRepository extends JpaRepository<Users, UUID> {
     @Query("SELECT u FROM Users u")
     Page<Users> findAllUsers(Pageable pageable);
 
-    @Query("SELECT COUNT(u) > 0 FROM Users u WHERE u.role = :role")
-    boolean existsByRole(@Param("role") Role role);
+    @Query("SELECT COUNT(u) FROM Users u WHERE u.role = :role")
+    long countByRole(@Param("role") Role role);
 
 }
