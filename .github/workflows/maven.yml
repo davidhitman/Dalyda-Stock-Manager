@@ -48,15 +48,73 @@ jobs:
             done
           fi
           
-          # Extract and display only failures from XML reports
+          # Extract and display detailed failure messages from XML reports
           echo "=== Detailed Failure Messages ==="
           if [ -d target/surefire-reports ]; then
             for xml_file in target/surefire-reports/TEST-*.xml; do
               if [ -f "$xml_file" ] && grep -q "<failure\|<error" "$xml_file"; then
                 echo "::error::Failed Test Class: $(basename $xml_file)"
-                # Extract failure/error messages
-                grep -A 15 "<failure\|<error" "$xml_file" | grep -E "(failure|error|message|stacktrace)" | head -30
+                echo "----------------------------------------"
+                
+                # Extract test name
+                test_name=$(grep -oP '(?<=name=")[^"]*' "$xml_file" | head -1)
+                if [ ! -z "$test_name" ]; then
+                  echo "Test: $test_name"
+                fi
+                
+                # Extract error message/body
+                echo "Error Message:"
+                grep -A 5 "<failure\|<error" "$xml_file" | grep -oP '(?<=<message><!\[CDATA\[)[^\]]*|(?<=<message>)[^<]*' | head -5
+                
+                # Extract GlobalErrorHandler GenericResponse messages
                 echo ""
+                echo "=== GlobalErrorHandler Error Messages ==="
+                xml_content=$(cat "$xml_file")
+                
+                # Extract JSON response bodies with "message" field (GenericResponse format)
+                if echo "$xml_content" | grep -q '"message"'; then
+                  # Extract message values from JSON
+                  echo "$xml_content" | grep -oP '"message"\s*:\s*"([^"]+)"' | sed 's/"message"\s*:\s*"\(.*\)"/\1/' | while read -r message; do
+                    if [ ! -z "$message" ]; then
+                      echo "::error::GlobalErrorHandler Message: $message"
+                    fi
+                  done
+                  
+                  # Extract full GenericResponse JSON objects
+                  echo ""
+                  echo "Full GenericResponse JSON:"
+                  echo "$xml_content" | grep -oP '\{"message"\s*:\s*"[^"]*"\s*,\s*"data"\s*:\s*[^}]*\}' | head -3
+                fi
+                
+                # Extract full failure/error details including body
+                echo ""
+                echo "=== Full Error Details ==="
+                grep -A 50 "<failure\|<error" "$xml_file" | grep -v "^--$" | head -40
+                
+                # Try to extract response body if present (look for JSON)
+                if echo "$xml_content" | grep -qi "response body\|body:"; then
+                  echo ""
+                  echo "=== Response Body ==="
+                  echo "$xml_content" | grep -i "Response Body\|response body\|body:" -A 5 | head -15
+                fi
+                
+                echo ""
+              fi
+            done
+          fi
+          
+          # Also check text reports for GenericResponse messages
+          echo "=== GlobalErrorHandler Messages from Text Reports ==="
+          if [ -d target/surefire-reports ]; then
+            for txt_file in target/surefire-reports/*.txt; do
+              if [ -f "$txt_file" ] && grep -qi "FAILURE\|ERROR\|FAILED" "$txt_file" 2>/dev/null; then
+                # Look for JSON with message field
+                if grep -q '"message"' "$txt_file"; then
+                  echo "::error::From $(basename $txt_file):"
+                  # Extract lines containing message field
+                  grep -A 2 -B 2 '"message"' "$txt_file" | head -10
+                  echo ""
+                fi
               fi
             done
           fi
