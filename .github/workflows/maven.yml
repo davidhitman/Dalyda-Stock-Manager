@@ -24,4 +24,39 @@ jobs:
         env:
           SPRING_PROFILES_ACTIVE: test
           JWT_SECRET: dGVzdC1qd3Qtc2VjcmV0LWtleS1mb3ItdGVzdGluZy1wdXJwb3Nlcy1vbmx5LTMyYnl0ZXM=
-        run: mvn clean install
+        run: mvn clean install --batch-mode --errors --fail-at-end
+
+      - name: Display Test Failures
+        if: failure()
+        run: |
+          echo "::error::=== Test Failures Detected ==="
+          echo ""
+          
+          # Display only failed test reports
+          if [ -d target/surefire-reports ]; then
+            echo "=== Failed Test Reports ==="
+            for file in target/surefire-reports/*.txt; do
+              if [ -f "$file" ]; then
+                # Only show files that contain failures or errors
+                if grep -qi "FAILURE\|ERROR\|FAILED" "$file" 2>/dev/null; then
+                  echo "::error::Test Report: $(basename $file)"
+                  echo "----------------------------------------"
+                  cat "$file"
+                  echo ""
+                fi
+              fi
+            done
+          fi
+          
+          # Extract and display only failures from XML reports
+          echo "=== Detailed Failure Messages ==="
+          if [ -d target/surefire-reports ]; then
+            for xml_file in target/surefire-reports/TEST-*.xml; do
+              if [ -f "$xml_file" ] && grep -q "<failure\|<error" "$xml_file"; then
+                echo "::error::Failed Test Class: $(basename $xml_file)"
+                # Extract failure/error messages
+                grep -A 15 "<failure\|<error" "$xml_file" | grep -E "(failure|error|message|stacktrace)" | head -30
+                echo ""
+              fi
+            done
+          fi
