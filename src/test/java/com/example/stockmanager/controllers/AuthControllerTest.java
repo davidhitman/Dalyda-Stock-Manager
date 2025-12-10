@@ -5,6 +5,7 @@ import com.example.stockmanager.dtos.UserDto;
 import com.example.stockmanager.entities.Role;
 import com.example.stockmanager.entities.Users;
 import com.example.stockmanager.repositories.UserRepository;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,6 +52,7 @@ class AuthControllerTest {
         testUser.setPassword(passwordEncoder.encode("password123"));
         testUser.setRole(Role.USER);
         testUser = userRepository.save(testUser);
+        userRepository.flush();
 
         loginDto = new UserDto.LoginDto();
         loginDto.setEmail("test@example.com");
@@ -80,11 +82,8 @@ class AuthControllerTest {
 
     @Test
     void testLogin_Success() throws Exception {
-        String jsonBody = String.format(
-            "{\"email\":\"%s\",\"password\":\"%s\"}",
-            loginDto.getEmail(),
-            loginDto.getPassword()
-        );
+        ObjectMapper mapper = new ObjectMapper();
+        String jsonBody = mapper.writeValueAsString(loginDto);
 
         mockMvc.perform(post("/api/v1/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
