@@ -136,69 +136,28 @@ class AuthControllerTest {
                         .content(objectMapper.writeValueAsString(loginDto)))
                 .andExpect(status().isBadRequest());
     }
-//
-//    @Test
-//    void testLogin_UserNotFound() throws Exception {
-//        loginDto.setEmail("nonexistent@example.com");
-//
-//        mockMvc.perform(post("/api/v1/auth/login")
-//                        .contentType(MediaType.APPLICATION_JSON)
-//                        .content(objectMapper.writeValueAsString(loginDto)))
-//                .andExpect(status().isBadRequest());
-//    }
-//
-//    @Test
-//    void testLogin_MissingPassword() throws Exception {
-//        loginDto.setPassword("");
-//
-//        mockMvc.perform(post("/api/v1/auth/login")
-//                        .contentType(MediaType.APPLICATION_JSON)
-//                        .content(objectMapper.writeValueAsString(loginDto)))
-//                .andExpect(status().isBadRequest());
-//    }
-//
-//    @Test
-//    void testPasswordReset_Success() throws Exception {
-//        String email = "test@example.com";
-//
-//        String originalPassword = testUser.getPassword();
-//
-//        mockMvc.perform(post("/api/v1/auth/password/reset")
-//                        .param("email", email))
-//                .andExpect(status().isOk())
-//                .andExpect(jsonPath("$.message").value("Password Reset Successful, a default password was sent to your email"))
-//                .andExpect(jsonPath("$.data").value(email));
-//
-//        userRepository.flush();
-//
-//        Users updatedUser = userRepository.findByEmail(email).orElseThrow();
-//        assertNotEquals(originalPassword, updatedUser.getPassword());
-//
-//        assertNotNull(updatedUser.getPassword());
-//        assertFalse(updatedUser.getPassword().isEmpty());
-//    }
-//
-//    @Test
-//    void testPasswordReset_InvalidEmail() throws Exception {
-//        mockMvc.perform(post("/api/v1/auth/password/reset")
-//                        .param("email", "invalid-email"))
-//                .andExpect(status().isBadRequest());
-//    }
-//
-//    @Test
-//    void testPasswordReset_BlankEmail() throws Exception {
-//        mockMvc.perform(post("/api/v1/auth/password/reset")
-//                        .param("email", ""))
-//                .andExpect(status().isBadRequest());
-//    }
-//
-//    @Test
-//    void testPasswordReset_UserNotFound() throws Exception {
-//        mockMvc.perform(post("/api/v1/auth/password/reset")
-//                        .param("email", "nonexistent@example.com"))
-//                .andExpect(status().isNotFound())
-//                .andExpect(jsonPath("$.data").isEmpty());
-//    }
+
+    @Test
+    void testPasswordReset_InvalidEmail() throws Exception {
+        mockMvc.perform(post("/api/v1/auth/password/reset")
+                        .param("email", "invalid-email"))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void testPasswordReset_BlankEmail() throws Exception {
+        mockMvc.perform(post("/api/v1/auth/password/reset")
+                        .param("email", ""))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void testPasswordReset_UserNotFound() throws Exception {
+        mockMvc.perform(post("/api/v1/auth/password/reset")
+                        .param("email", "nonexistent@example.com"))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.data").isEmpty());
+    }
 
 
 }
