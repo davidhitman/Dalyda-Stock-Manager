@@ -4,11 +4,11 @@ import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Primary;
 import org.springframework.mail.SimpleMailMessage;
-import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.JavaMailSenderImpl;
 
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
+import org.mockito.ArgumentMatchers;
 
 
 @TestConfiguration
@@ -16,9 +16,10 @@ public class TestMailConfig {
 
     @Bean
     @Primary
-    public JavaMailSender mailSender() {
-        JavaMailSender mockMailSender = mock(JavaMailSender.class);
-        doNothing().when(mockMailSender).send(any(SimpleMailMessage.class));
+    @SuppressWarnings("null")
+    public JavaMailSenderImpl mailSender() {
+        JavaMailSenderImpl mockMailSender = mock(JavaMailSenderImpl.class);
+        doNothing().when(mockMailSender).send(ArgumentMatchers.<SimpleMailMessage>any());
         return mockMailSender;
     }
 }
