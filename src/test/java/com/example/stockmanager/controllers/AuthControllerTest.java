@@ -40,6 +40,9 @@ class AuthControllerTest {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    @Autowired
+    private ObjectMapper objectMapper;
+
     private Users testUser;
 
     private UserDto.LoginDto loginDto;
@@ -82,8 +85,7 @@ class AuthControllerTest {
 
     @Test
     void testLogin_Success() throws Exception {
-        ObjectMapper mapper = new ObjectMapper();
-        String jsonBody = mapper.writeValueAsString(loginDto);
+        String jsonBody = objectMapper.writeValueAsString(loginDto);
 
         mockMvc.perform(post("/api/v1/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -94,17 +96,15 @@ class AuthControllerTest {
                 .andExpect(jsonPath("$.data").isString());
     }
 
+    @Test
+    void testLogin_InvalidEmail() throws Exception {
+        loginDto.setEmail("invalid-email");
 
-
-//    @Test
-//    void testLogin_InvalidEmail() throws Exception {
-//        loginDto.setEmail("invalid-email");
-//
-//        mockMvc.perform(post("/api/v1/auth/login")
-//                        .contentType(MediaType.APPLICATION_JSON)
-//                        .content(objectMapper.writeValueAsString(loginDto)))
-//                .andExpect(status().isBadRequest());
-//    }
+        mockMvc.perform(post("/api/v1/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(loginDto)))
+                .andExpect(status().isBadRequest());
+    }
 //
 //    @Test
 //    void testLogin_WrongPassword() throws Exception {
