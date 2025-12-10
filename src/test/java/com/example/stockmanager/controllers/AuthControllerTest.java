@@ -56,7 +56,7 @@ class AuthControllerTest {
 
         loginDto = new UserDto.LoginDto();
         loginDto.setEmail("test@example.com");
-        loginDto.setPassword("password1234");
+        loginDto.setPassword("password123");
     }
 
     @Test
